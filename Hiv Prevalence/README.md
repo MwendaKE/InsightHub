@@ -5,6 +5,9 @@ A Python-based data analysis tool that processes global HIV prevalence data from
 ### Key Features:
 
 · Smart CSV parsing with automatic delimiter detection
+
 · Global trend analysis and country comparisons
+
 · Professional PDF reports with charts and insights
+
 · Absolute case estimation and change detection
