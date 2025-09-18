@@ -45,11 +45,11 @@ Browser-based version using Chart.js for beginners. Simple interface with intera
 # Run the Python version (recommended)
 cd python/
 pip install -r requirements.txt
-python analysis.py
+death_causes.py
 
 # Run the R version
 cd r/
-Rscript analysis.R
+death_causes.R
 
 # Run the JavaScript version
-# Open index.html in any web browser
+# Open death_causes.html in any web browser
