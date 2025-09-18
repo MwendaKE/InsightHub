@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Causes of Death Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+        }
+        .insight-box {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Global Causes of Death Analysis</h1>
+        <p>Created by Mwenda E. Njagi @ Github.com/MwendaKE/InsightHub</p>
+        
+        <button class="btn" onclick="startAnalysis()">Start Analysis</button>
+        
+        <div id="loading" class="loading" style="display: none;">
+            Analyzing data... Please wait ✓
+        </div>
+        
+        <div id="results" style="display: none;">
+            <h2>📊 Executive Summary</h2>
+            <div id="summary"></div>
+            
+            <h2>📈 Global Causes of Death (2019)</h2>
+            <div class="chart-container">
+                <canvas id="globalChart"></canvas>
+            </div>
+            
+            <h2>🌎 Regional Variations</h2>
+            <div class="chart-container">
+                <canvas id="regionalChart"></canvas>
+            </div>
+            
+            <h2>💡 Key Insights</h2>
+            <div id="insights"></div>
+            
+            <h2>🎯 Recommendations</h2>
+            <div id="recommendations"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data creation (since we can't easily fetch external data in browser JS)
+        function createSampleData() {
+            console.log("Creating sample data...");
+            
+            const countries = ['United States', 'United Kingdom', 'Germany', 'Japan', 'Brazil', 'India', 'China', 'South Africa'];
+            const causes = [
+                'Cardiovascular diseases',
+                'Neoplasms',
+                'Chronic respiratory diseases',
+                'Lower respiratory infections',
+                'Diabetes mellitus'
+            ];
+            
+            const data = [];
+            
+            // Create data for 2019
+            for (const country of countries) {
+                const countryData = {
+                    Entity: country,
+                    Year: 2019,
+                    Code: country.substring(0, 3).toUpperCase()
+                };
+                
+                // Add random death rates for each cause
+                causes.forEach(cause => {
+                    countryData[cause] = Math.random() * 300 + 50; // Random between 50-350
+                });
+                
+                data.push(countryData);
+            }
+            
+            return data;
+        }
+
+        // Analyze global causes
+        function analyzeGlobalCauses(data) {
+            console.log("Analyzing global causes...");
+            
+            const causes = [
+                'Cardiovascular diseases',
+                'Neoplasms',
+                'Chronic respiratory diseases',
+                'Lower respiratory infections',
+                'Diabetes mellitus'
+            ];
+            
+            // Calculate average for each cause
+            const globalAverages = {};
+            causes.forEach(cause => {
+                const values = data.map(item => item[cause]).filter(val => val !== undefined);
+                globalAverages[cause] = values.reduce((sum, val) => sum + val, 0) / values.length;
+            });
+            
+            // Sort by death rate (highest first)
+            const sortedCauses = Object.entries(globalAverages)
+                .sort((a, b) => b[1] - a[1])
+                .map(([cause, rate]) => ({ cause, rate: Math.round(rate * 10) / 10 }));
+            
+            return sortedCauses;
+        }
+
+        // Analyze regional trends
+        function analyzeRegionalTrends(data) {
+            console.log("Analyzing regional trends...");
+            
+            const regions = {
+                'Europe': ['Germany', 'France', 'United Kingdom'],
+                'North America': ['United States', 'Canada'],
+                'South America': ['Brazil', 'Argentina'],
+                'Asia': ['Japan', 'China', 'India'],
+                'Africa': ['South Africa', 'Egypt']
+            };
+            
+            const causes = ['Cardiovascular diseases', 'Neoplasms'];
+            
+            const regionalData = {};
+            
+            for (const [region, countries] of Object.entries(regions)) {
+                regionalData[region] = {};
+                
+                for (const cause of causes) {
+                    const regionCountries = data.filter(item => 
+                        countries.includes(item.Entity) && item[cause] !== undefined
+                    );
+                    
+                    if (regionCountries.length > 0) {
+                        const avgRate = regionCountries.reduce((sum, item) => sum + item[cause], 0) / regionCountries.length;
+                        regionalData[region][cause] = Math.round(avgRate * 10) / 10;
+                    }
+                }
+            }
+            
+            return regionalData;
+        }
+
+        // Create charts
+        function createCharts(globalData, regionalData) {
+            console.log("Creating charts...");
+            
+            // Global causes chart
+            const globalCtx = document.getElementById('globalChart').getContext('2d');
+            new Chart(globalCtx, {
+                type: 'bar',
+                data: {
+                    labels: globalData.map(item => item.cause),
+                    datasets: [{
+                        label: 'Death Rate (per 100,000 people)',
+                        data: globalData.map(item => item.rate),
+                        backgroundColor: [
+                            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+                            '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43'
+                        ].slice(0, globalData.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top Global Causes of Death (2019)',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+
+            // Regional chart (Cardiovascular diseases)
+            const regionalCtx = document.getElementById('regionalChart').getContext('2d');
+            const regions = Object.keys(regionalData);
+            const cardioRates = regions.map(region => regionalData[region]['Cardiovascular diseases'] || 0);
+            
+            new Chart(regionalCtx, {
+                type: 'bar',
+                data: {
+                    labels: regions,
+                    datasets: [{
+                        label: 'Cardiovascular Diseases Death Rate',
+                        data: cardioRates,
+                        backgroundColor: '#FF6B6B'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Death Rates from Cardiovascular Diseases by Region',
+                            font: { size: 16, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display results
+        function displayResults(globalData, regionalData, stats) {
+            console.log("Displaying results...");
+            
+            // Summary
+            document.getElementById('summary').innerHTML = `
+                <div class="insight-box">
+                    <p><strong>Countries analyzed:</strong> ${stats.totalCountries}</p>
+                    <p><strong>Year:</strong> ${stats.year}</p>
+                    <p><strong>Leading cause:</strong> ${stats.topCause} (${stats.topRate} per 100k)</p>
+                    <p><strong>Second cause:</strong> ${stats.secondCause} (${stats.secondRate} per 100k)</p>
+                    <p><em>Note: Based on sample data for demonstration purposes</em></p>
+                </div>
+            `;
+
+            // Insights
+            document.getElementById('insights').innerHTML = `
+                <div class="insight-box">
+                    <h3>🔍 Key Findings</h3>
+                    <ul>
+                        <li>Non-communicable diseases dominate global mortality patterns</li>
+                        <li>Cardiovascular diseases are the leading cause worldwide</li>
+                        <li>Significant regional variations exist in death rates</li>
+                        <li>Urbanization and lifestyle factors influence disease patterns</li>
+                    </ul>
+                </div>
+            `;
+
+            // Recommendations
+            document.getElementById('recommendations').innerHTML = `
+                <div class="insight-box">
+                    <h3>✅ Recommendations</h3>
+                    <ol>
+                        <li><strong>Prevention:</strong> Implement public health programs for cardiovascular diseases</li>
+                        <li><strong>Healthcare:</strong> Strengthen healthcare systems in developing regions</li>
+                        <li><strong>Research:</strong> Support studies on disease patterns and interventions</li>
+                        <li><strong>Global cooperation:</strong> Share successful strategies across countries</li>
+                    </ol>
+                </div>
+            `;
+        }
+
+        // Main analysis function
+        function startAnalysis() {
+            console.log("Starting analysis...");
+            
+            // Show loading, hide results
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Simulate loading (real app would fetch data here)
+            setTimeout(() => {
+                // Create sample data
+                const data = createSampleData();
+                
+                // Analyze data
+                const globalData = analyzeGlobalCauses(data);
+                const regionalData = analyzeRegionalTrends(data);
+                
+                // Calculate statistics
+                const stats = {
+                    totalCountries: new Set(data.map(item => item.Entity)).size,
+                    year: 2019,
+                    topCause: globalData[0].cause,
+                    topRate: globalData[0].rate,
+                    secondCause: globalData[1].cause,
+                    secondRate: globalData[1].rate
+                };
+                
+                // Create charts
+                createCharts(globalData, regionalData);
+                
+                // Display results
+                displayResults(globalData, regionalData, stats);
+                
+                // Hide loading, show results
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                console.log("Analysis complete!");
+                
+            }, 2000); // Simulate 2 second loading
+        }
+
+        // Initialize when page loads
+        console.log("Global Causes of Death Analysis ready!");
+        console.log("Click the 'Start Analysis' button to begin");
+    </script>
+</body>
+</html>
