@@ -1,0 +1,21 @@
+{
+  "name": "diabetes-analysis-js",
+  "version": "1.0.0",
+  "description": "Diabetes patient data analysis with Node.js",
+  "main": "diabetes-analysis.js",
+  "scripts": {
+    "start": "node diabetes-analysis.js"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "pdfkit": "^0.13.0"
+  },
+  "keywords": [
+    "diabetes",
+    "analysis",
+    "healthcare",
+    "data-analysis"
+  ],
+  "author": "Mwenda E. Njagi",
+  "license": "MIT"
+}
